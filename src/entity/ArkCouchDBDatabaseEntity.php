@@ -66,7 +66,16 @@ class ArkCouchDBDatabaseEntity
 
     public function writeDocument($doc)
     {
-        $this->agent->getApiForDocument()->writeDocument($this->db, $doc['_id'], $doc);
+        if (isset($doc['_id']))
+            $response = $this->agent->getApiForDocument()->writeDocument($this->db, $doc['_id'], $doc);
+        else
+            $response = $this->agent->getApiForDocument()->createDocumentInDatabase($this->db, $doc);
+
+        if (!$response->is2XX()) {
+            return false;
+        }
+
+        return $response->getParsed();//would have three fields, `id`,`ok`,`rev`
     }
 
 }
