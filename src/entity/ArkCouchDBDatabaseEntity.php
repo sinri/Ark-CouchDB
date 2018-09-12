@@ -11,57 +11,80 @@ namespace sinri\ark\database\couchdb\entity;
 
 use sinri\ark\database\couchdb\ArkCouchDBAgent;
 
-class ArkCouchDBDatabaseEntity
+abstract class ArkCouchDBDatabaseEntity
 {
     /**
      * @var ArkCouchDBAgent
      */
-    protected $agent;
+    //protected $agent;
     /**
      * @var string
      */
-    protected $db;
+    //protected $db;
 
     public function __construct()
     {
     }
 
+//    /**
+//     * @param ArkCouchDBAgent $agent
+//     * @param string $db
+//     * @return ArkCouchDBDatabaseEntity
+//     * @throws \Exception
+//     */
+//    private static function createDatabaseAndGetEntity($agent, $db)
+//    {
+//        $response = $agent->getApiForDatabase()->createDatabase($db);
+//        if (!$response->is2XX()) {
+//            throw new \Exception($response->errorString());
+//        }
+//
+//        $entity = new ArkCouchDBDatabaseEntity();
+//        $entity->agent = $agent;
+//        $entity->db = $db;
+//        return $entity;
+//    }
+
+//    /**
+//     * @param ArkCouchDBAgent $agent
+//     * @param string $db
+//     * @param bool $createIfNotExist
+//     * @return ArkCouchDBDatabaseEntity
+//     * @throws \Exception
+//     */
+//    public static function openDatabaseAndGetEntity($agent, $db, $createIfNotExist = false)
+//    {
+//        if (!$agent->getApiForDatabase()->headDatabase($db)->is2XX()) {
+//            if ($createIfNotExist) return self::createDatabaseAndGetEntity($agent, $db);
+//            else throw new \Exception("Database does not exist");
+//        }
+//        $entity = new ArkCouchDBDatabaseEntity();
+//        $entity->agent = $agent;
+//        $entity->db = $db;
+//        return $entity;
+//    }
+
     /**
-     * @param ArkCouchDBAgent $agent
-     * @param string $db
-     * @return ArkCouchDBDatabaseEntity
+     * @return ArkCouchDBAgent
+     */
+    abstract public function agent();
+
+    /**
+     * @return string
+     */
+    abstract public function db();
+
+    /**
      * @throws \Exception
      */
-    private static function createDatabaseAndGetEntity($agent, $db)
+    public function ensureDatabaseExists()
     {
-        $response = $agent->getApiForDatabase()->createDatabase($db);
-        if (!$response->is2XX()) {
-            throw new \Exception($response->errorString());
+        if (!$this->agent()->getApiForDatabase()->headDatabase($this->db())->is2XX()) {
+            $response = $this->agent()->getApiForDatabase()->createDatabase($this->db());
+            if (!$response->is2XX()) {
+                throw new \Exception($response->errorString());
+            }
         }
-
-        $entity = new ArkCouchDBDatabaseEntity();
-        $entity->agent = $agent;
-        $entity->db = $db;
-        return $entity;
-    }
-
-    /**
-     * @param ArkCouchDBAgent $agent
-     * @param string $db
-     * @param bool $createIfNotExist
-     * @return ArkCouchDBDatabaseEntity
-     * @throws \Exception
-     */
-    public static function openDatabaseAndGetEntity($agent, $db, $createIfNotExist = false)
-    {
-        if (!$agent->getApiForDatabase()->headDatabase($db)->is2XX()) {
-            if ($createIfNotExist) return self::createDatabaseAndGetEntity($agent, $db);
-            else throw new \Exception("Database does not exist");
-        }
-        $entity = new ArkCouchDBDatabaseEntity();
-        $entity->agent = $agent;
-        $entity->db = $db;
-        return $entity;
     }
 
     /**
@@ -72,9 +95,9 @@ class ArkCouchDBDatabaseEntity
     public function writeDocument($doc)
     {
         if ($doc->getId())
-            $response = $this->agent->getApiForDocument()->writeDocument($this->db, $doc->getId(), $doc->getProperties());
+            $response = $this->agent()->getApiForDocument()->writeDocument($this->db(), $doc->getId(), $doc->getProperties());
         else
-            $response = $this->agent->getApiForDocument()->createDocumentInDatabase($this->db, $doc->getProperties());
+            $response = $this->agent()->getApiForDocument()->createDocumentInDatabase($this->db(), $doc->getProperties());
 
         if (!$response->is2XX()) {
             throw new \Exception($response->errorString());
@@ -111,7 +134,7 @@ class ArkCouchDBDatabaseEntity
         if ($index !== null) {
             $options['use_index'] = $index;
         }
-        $response = $this->agent->getApiForDocument()->findDocuments($this->db, $options);
+        $response = $this->agent()->getApiForDocument()->findDocuments($this->db(), $options);
         if (!$response->is2XX()) {
             throw new \Exception($response->errorString());
         }
