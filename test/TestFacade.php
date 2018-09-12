@@ -21,6 +21,9 @@ class TestFacade
         $username = "";
         $password = "";
 
+        if (file_exists(__DIR__ . '/config.php')) {
+            require __DIR__ . '/config.php';
+        }
 
         $agent = new \sinri\ark\database\couchdb\ArkCouchDBAgent($host, $port, $username, $password);
         return $agent;
