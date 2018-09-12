@@ -64,18 +64,58 @@ class ArkCouchDBDatabaseEntity
         return $entity;
     }
 
+    /**
+     * @param ArkCouchDBDocumentEntity $doc
+     * @return ArkCouchDBDocumentEntity
+     * @throws \Exception
+     */
     public function writeDocument($doc)
     {
-        if (isset($doc['_id']))
-            $response = $this->agent->getApiForDocument()->writeDocument($this->db, $doc['_id'], $doc);
+        if ($doc->getId())
+            $response = $this->agent->getApiForDocument()->writeDocument($this->db, $doc->getId(), $doc->getProperties());
         else
-            $response = $this->agent->getApiForDocument()->createDocumentInDatabase($this->db, $doc);
+            $response = $this->agent->getApiForDocument()->createDocumentInDatabase($this->db, $doc->getProperties());
 
         if (!$response->is2XX()) {
-            return false;
+            throw new \Exception($response->errorString());
         }
 
-        return $response->getParsed();//would have three fields, `id`,`ok`,`rev`
+        $docId = $response->getParsedItemByIndex(['id']);
+        $doc->loadExistDocument($docId);
+        return $doc;
     }
 
+    /**
+     * @param array $selector JSON object describing criteria used to select documents. More information provided in the section on selector syntax. @see http://docs.couchdb.org/en/latest/api/database/find.html#find-selectors
+     * @param int $limit Maximum number of results returned. Default is 25.
+     * @param int $skip Skip the first ‘n’ results, where ‘n’ is the value specified.
+     * @param null|array $sort JSON array following sort syntax. @see http://docs.couchdb.org/en/latest/api/database/find.html#find-sort
+     * @param null|array $fields JSON array specifying which fields of each object should be returned. If it is omitted, the entire object is returned. More information provided in the section on filtering fields. @see http://docs.couchdb.org/en/latest/api/database/find.html#find-filter
+     * @param null|string|array $index Instruct a query to use a specific index. Specified either as "<design_document>" or ["<design_document>", "<index_name>"].
+     * @return array
+     * @throws \Exception
+     */
+    public function findDocuments($selector, $limit = 10, $skip = 0, $sort = null, $fields = null, $index = null)
+    {
+        $options = [
+            'selector' => (object)$selector,
+            'limit' => $limit,
+            'skip' => $skip,
+        ];
+        if ($sort !== null) {
+            $options['sort'] = (object)$sort;
+        }
+        if ($fields !== null) {
+            $options['fields'] = $fields;
+        }
+        if ($index !== null) {
+            $options['use_index'] = $index;
+        }
+        $response = $this->agent->getApiForDocument()->findDocuments($this->db, $options);
+        if (!$response->is2XX()) {
+            throw new \Exception($response->errorString());
+        }
+        $docs = $response->getParsedItemByIndex(['docs']);
+        return $docs;
+    }
 }

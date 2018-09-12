@@ -255,4 +255,30 @@ class ArkCouchDBDocumentApi extends ArkCouchDBAbstractApi
 
     // Attachment is not in plan
     // @see http://docs.couchdb.org/en/latest/api/document/common.html#attachments
+
+    /**
+     * @param string $db
+     * @param array $options
+     * @return ArkCouchDBResponse
+     * @throws \Exception
+     */
+    public function findDocuments($db, $options)
+    {
+        $request = new ArkCouchDBRequest(ArkCouchDBRequest::METHOD_POST, "/" . urlencode($db) . "/_find");
+        $request->setBodyAndType($options, ArkCouchDBRequest::BODY_AS_JSON);
+        $response = $this->callApi($request);
+        return $response;
+//        Response JSON Object:
+//
+//        docs (object) – Array of documents matching the search. In each matching document, the fields specified in the fields part of the request body are listed, along with their values.
+//                warning (string) – Execution warnings
+//        execution_stats (object) – Execution statistics
+//        bookmark (string) – An opaque string used for paging. See the bookmark field in the request (above) for usage details.
+//
+//        Status Codes:
+//                    200 OK – Request completed successfully
+//        400 Bad Request – Invalid request
+//        401 Unauthorized – Read permission required
+//        500 Internal Server Error – Query execution error
+    }
 }

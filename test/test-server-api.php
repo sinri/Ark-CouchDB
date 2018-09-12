@@ -6,25 +6,27 @@
  * Time: 13:38
  */
 
+use sinri\ark\database\couchdb\test\TestFacade;
+
 require_once __DIR__ . '/test-include.php';
 
 $serverApi = $agent->getApiForServer();
 
 $couchDBInstanceMetaInfo = $serverApi->getCouchDBInstanceMetaInfo();
-show('$couchDBInstanceMetaInfo', $couchDBInstanceMetaInfo);
+TestFacade::show('$couchDBInstanceMetaInfo', $couchDBInstanceMetaInfo);
 //echo json_encode($couchDBInstanceMetaInfo,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
 
 $activeTasks = $serverApi->getActiveTasks();
-show('$activeTasks', $activeTasks);
+TestFacade::show('$activeTasks', $activeTasks);
 
 $databases = $serverApi->getAllDatabases();
-show('$databases', $databases);
+TestFacade::show('$databases', $databases);
 
 $dbsInfo = $serverApi->batchQueryDatabaseInfo(["fountain"]);
-show('$dbsInfo', $dbsInfo);
+TestFacade::show('$dbsInfo', $dbsInfo);
 
 $memberNodes = $serverApi->getMemberShip();
-show('$memberNodes', $memberNodes);
+TestFacade::show('$memberNodes', $memberNodes);
 
 $uuids = $serverApi->getUUIDs(2);
-show('$uuids', $uuids);
+TestFacade::show('$uuids', $uuids);
