@@ -11,12 +11,18 @@
   ],
   "minimum-stability": "stable",
   "require": {
-    "sinri/ark-core": "~1.0",
+    "ext-json": "*",
+    "sinri/ark-core": "~1.2",
     "sinri/ark-curl": "~1.0"
   },
   "autoload": {
     "psr-4": {
       "sinri\\ark\\database\\couchdb\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "sinri\\ark\\database\\couchdb\\test\\": "test/"
     }
   }
 }
